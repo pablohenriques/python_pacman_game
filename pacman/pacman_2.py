@@ -12,7 +12,9 @@ VELOCIDADE = 1
 
 class Cenario:
 
-    def __init__(self, tamanho):
+    def __init__(self, tamanho, pac):
+        self.pacman = pac
+        self.pontos = 0
         self.tamanho = tamanho
         self.matriz = [
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -62,6 +64,17 @@ class Cenario:
         for numero_linha, linha in enumerate(self.matriz):
             self.pintar_linha(tela, numero_linha, linha)
 
+    def calcular_regras(self):
+        col = self.pacman.coluna_intencao
+        lin = self.pacman.linha_intencao
+        if (0 <= col < 28) and (0 <= lin < 29):
+            if self.matriz[lin][col] != 2:
+                self.pacman.aceitar_movimento()
+                if self.matriz[lin][col] == 1:
+                    self.pontos += 1
+                    self.matriz[lin][col] = 0
+                    print(self.pontos)
+
 
 class Pacman:
 
@@ -74,10 +87,12 @@ class Pacman:
         self.vel_x = 0
         self.vel_y = 0
         self.raio = int(self.tamanho / 2)
+        self.coluna_intencao = self.coluna
+        self.linha_intencao = self.linha
 
     def calcular_regras(self):
-        self.coluna = self.coluna + self.vel_x
-        self.linha = self.linha + self.vel_y
+        self.coluna_intencao = self.coluna + self.vel_x
+        self.linha_intencao = self.linha + self.vel_y
         self.centro_x = int(self.coluna * self.tamanho + self.raio)
         self.centro_y = int(self.linha * self.tamanho + self.raio)
 
@@ -128,6 +143,10 @@ class Pacman:
                 self.coluna = (mouse_x - self.centro_x) / delay
                 self.linha = (mouse_y - self.centro_y) / delay
 
+    def aceitar_movimento(self):
+        self.linha = self.linha_intencao
+        self.coluna = self.coluna_intencao
+
     def __str__(self):
         return f"{self.centro_x}"
 
@@ -135,11 +154,12 @@ class Pacman:
 if __name__ == "__main__":
     size = 600//30
     pacman = Pacman(size)
-    cenario = Cenario(size)
+    cenario = Cenario(size, pacman)
 
     while True:
         # calcular as regras
         pacman.calcular_regras()
+        cenario.calcular_regras()
 
         # pintar a tela
         screen.fill(PRETO)
