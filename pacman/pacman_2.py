@@ -1,5 +1,7 @@
 import pygame
 
+from abc import ABCMeta, abstractmethod
+
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600), 0)
@@ -11,7 +13,22 @@ AZUL = (0, 0, 255)
 VELOCIDADE = 1
 
 
-class Cenario:
+class ElementoJogo(metaclass=ABCMeta):
+
+    @abstractmethod
+    def pintar(self):
+        pass
+
+    @abstractmethod
+    def calcular_regras(self):
+        pass
+
+    @abstractmethod
+    def processar_eventos(self, eventos):
+        pass
+
+
+class Cenario(ElementoJogo):
 
     def __init__(self, tamanho, pac):
         self.pacman = pac
@@ -81,8 +98,13 @@ class Cenario:
                     self.pontos += 1
                     self.matriz[lin][col] = 0
 
+    def processar_eventos(self, evts):
+        for e in evts:
+            if e.type == pygame.QUIT:
+                exit()
 
-class Pacman:
+
+class Pacman(ElementoJogo):
 
     def __init__(self, tamanho):
         self.linha = 1
@@ -176,8 +198,5 @@ if __name__ == "__main__":
 
         # capturar os eventos
         eventos = pygame.event.get()
-        for e in eventos:
-            if e.type == pygame.QUIT:
-                exit()
-            pacman.processar_eventos(eventos)
-            # pacman.processar_eventos_mouse(eventos)
+        pacman.processar_eventos(eventos)
+        cenario.processar_eventos(eventos)
